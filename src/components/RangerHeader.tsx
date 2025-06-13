@@ -13,6 +13,13 @@ const RangerHeader = () => {
         <div className="flex items-center space-x-3">
           <Shield className="h-8 w-8 text-blue-600" />
           <div>
+            <div className="flex items-center space-x-2 mb-1">
+              <img 
+                src="/lovable-uploads/2d2ff1fb-a188-4a19-9e69-c90533fe27ed.png" 
+                alt="HealthProAssist" 
+                className="h-6"
+              />
+            </div>
             <h1 className="text-2xl font-bold text-gray-900">Ranger AI</h1>
             <p className="text-sm text-gray-600">Your trusted veteran support companion</p>
           </div>

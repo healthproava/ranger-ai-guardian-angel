@@ -4,6 +4,7 @@ import SafetyBanner from "@/components/SafetyBanner";
 import ConversationInterface from "@/components/ConversationInterface";
 import QuickActions from "@/components/QuickActions";
 import ResourcesPanel from "@/components/ResourcesPanel";
+import VoiceInterface from "@/components/VoiceInterface";
 
 const Index = () => {
   return (
@@ -38,6 +39,9 @@ const Index = () => {
           </div>
         </footer>
       </main>
+      
+      {/* Voice Interface - Fixed positioned */}
+      <VoiceInterface />
     </div>
   );
 };
