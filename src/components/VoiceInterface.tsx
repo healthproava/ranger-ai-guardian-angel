@@ -1,18 +1,22 @@
-
+// src/components/VoiceInterface.tsx
 import React, { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Phone } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useConversationContext } from '@/contexts/ConversationContext'; // Import useConversationContext
 
 const VoiceInterface = () => {
   const { toast } = useToast();
-  const [isConnected, setIsConnected] = useState(false);
-  
+  // Get addMessage and setVoiceSessionActive from the shared context
+  const { addMessage, setVoiceSessionActive } = useConversationContext();
+  const [isConnected, setIsConnected] = useState(false); // Local state for immediate button feedback
+
   const conversation = useConversation({
     onConnect: () => {
       console.log('Connected to ElevenLabs');
       setIsConnected(true);
+      setVoiceSessionActive(true); // Update shared voice session status
       toast({
         title: "Voice Chat Connected",
         description: "You can now speak with Ranger AI",
@@ -21,16 +25,38 @@ const VoiceInterface = () => {
     onDisconnect: () => {
       console.log('Disconnected from ElevenLabs');
       setIsConnected(false);
+      setVoiceSessionActive(false); // Update shared voice session status
       toast({
         title: "Voice Chat Ended",
         description: "Voice conversation has been disconnected",
       });
     },
     onMessage: (message) => {
+      // This callback receives AI responses (transcript and audio)
       console.log('Received message:', message);
+      if (message.text) {
+        addMessage({
+          text: message.text,
+          sender: 'ranger', // Assuming messages from onMessage are AI responses
+          type: 'voice',
+        });
+      }
+    },
+    onUserSpeech: (text) => {
+      // This callback receives the user's speech transcript
+      console.log('User spoke:', text);
+      if (text) {
+        addMessage({
+          text: text,
+          sender: 'user', // User's speech
+          type: 'voice',
+        });
+      }
     },
     onError: (error) => {
       console.error('Voice chat error:', error);
+      setIsConnected(false); // Local state reset
+      setVoiceSessionActive(false); // Update shared voice session status on error
       toast({
         title: "Voice Chat Error",
         description: "There was an issue with the voice connection",
@@ -41,8 +67,7 @@ const VoiceInterface = () => {
 
   const startVoiceChat = async () => {
     try {
-      const agentId = "agent_01jxbejesxfz081hs8wrx21ky7";
-      
+      const agentId = "agent_01jxbejesxfz081hs8wrx21ky7"; //
       await conversation.startSession({ agentId });
     } catch (error) {
       console.error('Failed to start voice chat:', error);
