@@ -41,18 +41,8 @@ const VoiceInterface = () => {
 
   const startVoiceChat = async () => {
     try {
-      // You'll need to get your agent ID from ElevenLabs dashboard
-      const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
+      const agentId = "agent_01jxbejesxfz081hs8wrx21ky7";
       
-      if (!agentId) {
-        toast({
-          title: "Configuration Error",
-          description: "ElevenLabs agent ID not configured",
-          variant: "destructive",
-        });
-        return;
-      }
-
       await conversation.startSession({ agentId });
     } catch (error) {
       console.error('Failed to start voice chat:', error);
@@ -74,27 +64,27 @@ const VoiceInterface = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <div className="bg-white rounded-full shadow-lg p-4 border border-gray-200">
+      <div className="bg-white rounded-full shadow-lg p-4 border border-[#bcc9d0]">
         {!isConnected ? (
           <Button
             onClick={startVoiceChat}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 flex items-center justify-center"
+            className="bg-[#2B8EB8] hover:bg-[#2596be] text-white rounded-full w-16 h-16 flex items-center justify-center"
             size="lg"
           >
             <Mic className="h-6 w-6" />
           </Button>
         ) : (
           <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 rounded-full">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-700 font-medium">
+            <div className="flex items-center space-x-2 px-3 py-2 bg-[#2596be] bg-opacity-20 rounded-full">
+              <div className="w-3 h-3 bg-[#2B8EB8] rounded-full animate-pulse"></div>
+              <span className="text-sm text-[#3f586b] font-medium">
                 {conversation.isSpeaking ? 'Ranger is speaking...' : 'Listening...'}
               </span>
             </div>
             <Button
               onClick={endVoiceChat}
               variant="outline"
-              className="rounded-full w-12 h-12 flex items-center justify-center text-red-600 hover:bg-red-50"
+              className="rounded-full w-12 h-12 flex items-center justify-center text-[#FF0000] hover:bg-red-50 border-[#bcc9d0]"
             >
               <Phone className="h-5 w-5" />
             </Button>
@@ -104,7 +94,7 @@ const VoiceInterface = () => {
       
       {!isConnected && (
         <div className="mt-2 text-center">
-          <p className="text-xs text-gray-600">Click to start voice chat</p>
+          <p className="text-xs text-[#3f586b]">Click to start voice chat</p>
         </div>
       )}
     </div>

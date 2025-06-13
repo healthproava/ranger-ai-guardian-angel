@@ -8,7 +8,7 @@ import VoiceInterface from "@/components/VoiceInterface";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#bcc9d0] bg-opacity-10">
       <RangerHeader />
       
       <main className="max-w-7xl mx-auto px-4 py-6">
@@ -28,8 +28,8 @@ const Index = () => {
         </div>
         
         {/* Footer */}
-        <footer className="mt-12 pt-6 border-t border-gray-200">
-          <div className="text-center text-sm text-gray-600">
+        <footer className="mt-12 pt-6 border-t border-[#bcc9d0]">
+          <div className="text-center text-sm text-[#3f586b]">
             <p className="mb-2">
               Ranger AI is a demonstration platform. Always verify information with official VA sources.
             </p>

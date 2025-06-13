@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -145,25 +144,24 @@ const ConversationInterface = () => {
 
   const toggleListening = () => {
     setIsListening(!isListening);
-    // In a real implementation, this would toggle speech recognition
     console.log(isListening ? 'Stopped listening' : 'Started listening');
   };
 
   return (
-    <Card className="h-[600px] flex flex-col">
-      <div className="p-4 border-b bg-gray-50">
+    <Card className="h-[600px] flex flex-col border-[#bcc9d0]">
+      <div className="p-4 border-b bg-[#bcc9d0] bg-opacity-20">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">Conversation with Ranger</h3>
+          <h3 className="font-semibold text-[#363643]">Conversation with Ranger</h3>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               size="sm"
               onClick={toggleListening}
-              className={isListening ? 'bg-red-100 border-red-300' : ''}
+              className={`border-[#bcc9d0] ${isListening ? 'bg-red-100 border-[#FF0000]' : ''}`}
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-[#bcc9d0]">
               <Volume2 className="h-4 w-4" />
             </Button>
           </div>
@@ -180,15 +178,15 @@ const ConversationInterface = () => {
               <div
                 className={`max-w-[80%] p-3 rounded-lg ${
                   message.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    ? 'bg-[#2B8EB8] text-white'
+                    : 'bg-[#bcc9d0] bg-opacity-30 text-[#363643]'
                 }`}
               >
                 <p className="whitespace-pre-wrap">{message.text}</p>
                 {message.resources && (
                   <div className="mt-3 space-y-2">
                     {message.resources.map((resource, index) => (
-                      <div key={index} className="bg-white bg-opacity-10 p-2 rounded border">
+                      <div key={index} className="bg-white bg-opacity-20 p-2 rounded border border-[#2596be]">
                         <h4 className="font-medium text-sm">{resource.title}</h4>
                         <p className="text-xs opacity-90">{resource.description}</p>
                       </div>
@@ -203,11 +201,11 @@ const ConversationInterface = () => {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 p-3 rounded-lg">
+              <div className="bg-[#bcc9d0] bg-opacity-30 p-3 rounded-lg">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-[#3f586b] rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-[#3f586b] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-[#3f586b] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
@@ -216,20 +214,20 @@ const ConversationInterface = () => {
         <div ref={messagesEndRef} />
       </ScrollArea>
       
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-[#bcc9d0]">
         <div className="flex space-x-2">
           <Input
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message here... (or use voice)"
-            className="flex-1"
+            className="flex-1 border-[#bcc9d0]"
             disabled={isLoading}
           />
           <Button 
             onClick={handleSendMessage} 
             disabled={!inputText.trim() || isLoading}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-[#2B8EB8] hover:bg-[#2596be]"
           >
             <Send className="h-4 w-4" />
           </Button>
