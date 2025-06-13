@@ -1,31 +1,27 @@
+// src/components/ConversationInterface.tsx
 import { useState, useRef, useEffect } from 'react';
 import { Send, Mic, MicOff, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useConversationContext } from '@/contexts/ConversationContext'; // Import context
+import { useConversationContext } from '@/contexts/ConversationContext'; // Import useConversationContext
 
 const ConversationInterface = () => {
-  const { messages, addMessage } = useConversationContext(); // Use messages and addMessage from context
+  // Get messages and isVoiceSessionActive from the shared context
+  const { messages, addMessage, isVoiceSessionActive } = useConversationContext();
   const [inputText, setInputText] = useState('');
-  const [isListening, setIsListening] = useState(false); // This might be controlled by VoiceInterface if needed
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Keep this function for AI's text responses based on text input.
-  // For voice inputs, the ElevenLabs onMessage callback would handle AI responses.
-  const getRangerResponse = (userMessage: string) => { // Removed Message type from here, it's inferred now
+  const getRangerResponse = (userMessage: string) => {
     const lowerMessage = userMessage.toLowerCase();
     
+    // Original AI response logic based on text input
     if (lowerMessage.includes('disability') || lowerMessage.includes('claim')) {
       return {
         text: "I can definitely help you with disability claims. The process can seem overwhelming, but I'll guide you through it step by step. To get started, I'll need to know: Are you filing a new claim, or do you need help with an existing one? Also, do you have your DD-214 and medical records ready?",
@@ -96,7 +92,7 @@ const ConversationInterface = () => {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // Add user message to shared state
+    // Add user's text message to shared state
     addMessage({
       text: inputText,
       sender: 'user',
@@ -121,11 +117,12 @@ const ConversationInterface = () => {
     }
   };
 
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    console.log(isListening ? 'Stopped listening' : 'Started listening');
-    // In a real application, this would trigger the voice interface's listening state
-    // You might want to move the actual ElevenLabs session control logic here or ensure VoiceInterface subscribes to this state.
+  // This button is now a visual indicator of the global voice session status.
+  // To make it functional (i.e., click to start/stop voice),
+  // you would need to expose startVoiceChat/endVoiceChat functions from VoiceInterface via the context.
+  const handleMicButtonClick = () => {
+    // For now, it just provides visual feedback.
+    // The main voice control is the floating mic button from VoiceInterface.
   };
 
   return (
@@ -137,10 +134,10 @@ const ConversationInterface = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={toggleListening} // This button in ConversationInterface doesn't control actual voice chat directly now
-              className={`border-[#bcc9d0] ${isListening ? 'bg-red-100 border-[#FF0000]' : ''}`}
+              onClick={handleMicButtonClick} // This button in ConversationInterface doesn't control actual voice chat directly now
+              className={`border-[#bcc9d0] ${isVoiceSessionActive ? 'bg-red-100 border-[#FF0000]' : ''}`}
             >
-              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              {isVoiceSessionActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
             <Button variant="outline" size="sm" className="border-[#bcc9d0]">
               <Volume2 className="h-4 w-4" />
