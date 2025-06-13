@@ -4,30 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'ranger';
-  timestamp: Date;
-  resources?: Array<{
-    title: string;
-    description: string;
-    link: string;
-  }>;
-}
+import { useConversationContext } from '@/contexts/ConversationContext'; // Import context
 
 const ConversationInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello! I'm Ranger, your AI companion designed to help veterans and their families navigate benefits, resources, and support. Thank you for your service. How can I help you today?",
-      sender: 'ranger',
-      timestamp: new Date(),
-    }
-  ]);
+  const { messages, addMessage } = useConversationContext(); // Use messages and addMessage from context
   const [inputText, setInputText] = useState('');
-  const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListening] = useState(false); // This might be controlled by VoiceInterface if needed
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -39,15 +21,16 @@ const ConversationInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  const getRangerResponse = (userMessage: string): Message => {
+  // Keep this function for AI's text responses based on text input.
+  // For voice inputs, the ElevenLabs onMessage callback would handle AI responses.
+  const getRangerResponse = (userMessage: string) => { // Removed Message type from here, it's inferred now
     const lowerMessage = userMessage.toLowerCase();
     
     if (lowerMessage.includes('disability') || lowerMessage.includes('claim')) {
       return {
-        id: Date.now().toString(),
         text: "I can definitely help you with disability claims. The process can seem overwhelming, but I'll guide you through it step by step. To get started, I'll need to know: Are you filing a new claim, or do you need help with an existing one? Also, do you have your DD-214 and medical records ready?",
         sender: 'ranger',
-        timestamp: new Date(),
+        type: 'text', // Specify type
         resources: [
           {
             title: "VA Form 21-526EZ",
@@ -65,10 +48,9 @@ const ConversationInterface = () => {
     
     if (lowerMessage.includes('sleep') || lowerMessage.includes('ptsd') || lowerMessage.includes('mental')) {
       return {
-        id: Date.now().toString(),
         text: "I'm sorry you're struggling with this. Sleep issues and mental health challenges are very common among veterans, and you're not alone. Would you like me to share some immediate coping strategies, connect you with mental health resources, or help you find a VA mental health provider? Remember, if you're in crisis, please call 988 and press 1.",
         sender: 'ranger',
-        timestamp: new Date(),
+        type: 'text', // Specify type
         resources: [
           {
             title: "PTSD Coach App",
@@ -86,10 +68,9 @@ const ConversationInterface = () => {
     
     if (lowerMessage.includes('housing') || lowerMessage.includes('home') || lowerMessage.includes('rent')) {
       return {
-        id: Date.now().toString(),
         text: "Housing stability is crucial, and there are several programs designed to help veterans. I can help you explore options like HUD-VASH vouchers, Supportive Services for Veteran Families (SSVF), or VA home loans. What's your current housing situation, and what kind of assistance would be most helpful?",
         sender: 'ranger',
-        timestamp: new Date(),
+        type: 'text', // Specify type
         resources: [
           {
             title: "HUD-VASH Program",
@@ -106,31 +87,29 @@ const ConversationInterface = () => {
     }
     
     return {
-      id: Date.now().toString(),
       text: "I understand. That's a great question, and I'm here to help you find the right resources and support. Can you tell me a bit more about what specific area you'd like assistance with? I can help with VA benefits, mental health resources, housing assistance, education benefits, or connecting you with local veteran services.",
       sender: 'ranger',
-      timestamp: new Date(),
+      type: 'text', // Specify type
     };
   };
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
+    // Add user message to shared state
+    addMessage({
       text: inputText,
       sender: 'user',
-      timestamp: new Date(),
-    };
+      type: 'text',
+    });
 
-    setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsLoading(true);
 
-    // Simulate AI processing delay
+    // Simulate AI processing delay for text responses
     setTimeout(() => {
       const rangerResponse = getRangerResponse(inputText);
-      setMessages(prev => [...prev, rangerResponse]);
+      addMessage(rangerResponse); // Add AI response to shared state
       setIsLoading(false);
     }, 1500);
   };
@@ -145,6 +124,8 @@ const ConversationInterface = () => {
   const toggleListening = () => {
     setIsListening(!isListening);
     console.log(isListening ? 'Stopped listening' : 'Started listening');
+    // In a real application, this would trigger the voice interface's listening state
+    // You might want to move the actual ElevenLabs session control logic here or ensure VoiceInterface subscribes to this state.
   };
 
   return (
@@ -156,7 +137,7 @@ const ConversationInterface = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={toggleListening}
+              onClick={toggleListening} // This button in ConversationInterface doesn't control actual voice chat directly now
               className={`border-[#bcc9d0] ${isListening ? 'bg-red-100 border-[#FF0000]' : ''}`}
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
@@ -193,7 +174,8 @@ const ConversationInterface = () => {
                     ))}
                   </div>
                 )}
-                <p className="text-xs opacity-70 mt-1">
+                <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
+                  {message.type === 'voice' && <Mic className="h-3 w-3" />} {/* Voice indicator */}
                   {message.timestamp.toLocaleTimeString()}
                 </p>
               </div>
