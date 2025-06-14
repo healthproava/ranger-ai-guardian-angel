@@ -11,9 +11,8 @@ import { useConversation } from '@11labs/react';
 import { useConversationContext } from '@/contexts/ConversationContext';
 
 const ConversationInterface = () => {
-  const { messages, addMessage, isVoiceSessionActive, setVoiceSessionActive } = useConversationContext();
+  const { messages, addMessage, isVoiceSessionActive, setVoiceSessionActive, isLoading, sendMessage } = useConversationContext();
   const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -169,23 +168,9 @@ const ConversationInterface = () => {
     };
   };
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
-
-    addMessage({
-      text: inputText,
-      sender: 'user',
-      type: 'text',
-    });
-
+  const handleSendMessage = () => {
+    sendMessage(inputText);
     setInputText('');
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const rangerResponse = getRangerResponse(inputText);
-      addMessage(rangerResponse);
-      setIsLoading(false);
-    }, 1500);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

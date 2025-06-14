@@ -1,5 +1,5 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { getRangerResponse } from '@/lib/ranger-responses';
 
 interface Message {
   id: string;
@@ -19,6 +19,8 @@ interface ConversationContextType {
   addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
   isVoiceSessionActive: boolean; // Track voice session status
   setVoiceSessionActive: (active: boolean) => void;
+  isLoading: boolean;
+  sendMessage: (text: string) => void;
 }
 
 const ConversationContext = createContext<ConversationContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export const ConversationProvider: React.FC<{ children: ReactNode }> = ({ childr
     },
   ]);
   const [isVoiceSessionActive, setVoiceSessionActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const addMessage = (newMessage: Omit<Message, 'id' | 'timestamp'>) => {
     setMessages((prevMessages) => [
@@ -46,12 +49,32 @@ export const ConversationProvider: React.FC<{ children: ReactNode }> = ({ childr
     ]);
   };
 
+  const sendMessage = (text: string) => {
+    if (!text.trim()) return;
+
+    addMessage({
+      text,
+      sender: 'user',
+      type: 'text',
+    });
+
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const rangerResponse = getRangerResponse(text);
+      addMessage(rangerResponse);
+      setIsLoading(false);
+    }, 1500);
+  };
+
   return (
     <ConversationContext.Provider value={{ 
       messages, 
       addMessage, 
       isVoiceSessionActive, 
-      setVoiceSessionActive 
+      setVoiceSessionActive,
+      isLoading,
+      sendMessage 
     }}>
       {children}
     </ConversationContext.Provider>

@@ -1,9 +1,10 @@
 
 import { FileText, Brain, Home, GraduationCap, Briefcase, Users } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useConversationContext } from '@/contexts/ConversationContext';
 
 const QuickActions = () => {
+  const { sendMessage } = useConversationContext();
   const actions = [
     {
       icon: FileText,
@@ -50,8 +51,7 @@ const QuickActions = () => {
   ];
 
   const handleActionClick = (title: string) => {
-    console.log(`Selected action: ${title}`);
-    // In a real implementation, this would trigger the conversation with a specific topic
+    sendMessage(title);
   };
 
   return (
