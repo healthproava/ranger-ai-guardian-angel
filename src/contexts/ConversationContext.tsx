@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { getRangerResponse } from '@/lib/ranger-responses';
 
@@ -26,15 +27,7 @@ interface ConversationContextType {
 const ConversationContext = createContext<ConversationContextType | undefined>(undefined);
 
 export const ConversationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello! I'm Ranger, your AI companion designed to help veterans and their families navigate benefits, resources, and support. Thank you for your service. How can I help you today?",
-      sender: 'ranger',
-      timestamp: new Date(),
-      type: 'text', // Default to text for initial message
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isVoiceSessionActive, setVoiceSessionActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,6 +45,8 @@ export const ConversationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
 
+    const isFirstInteraction = messages.length === 0;
+
     addMessage({
       text,
       sender: 'user',
@@ -62,6 +57,9 @@ export const ConversationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     setTimeout(() => {
       const rangerResponse = getRangerResponse(text);
+      if (isFirstInteraction) {
+        rangerResponse.text = "Hello! I'm Ranger, your AI companion designed to help veterans and their families navigate benefits, resources, and support. Thank you for your service.\n\n" + rangerResponse.text;
+      }
       addMessage(rangerResponse);
       setIsLoading(false);
     }, 1500);

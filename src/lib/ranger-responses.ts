@@ -61,6 +61,66 @@ export const getRangerResponse = (userMessage: string) => {
         ]
       };
     }
+
+    if (lowerMessage.includes('education') || lowerMessage.includes('gi bill')) {
+      return {
+        text: "Navigating education benefits like the GI Bill can be complex, but very rewarding. I can help you understand your eligibility, find approved schools with programs like VET TEC, and start the application process. Are you looking to start a new program or continue your education?",
+        sender: 'ranger' as const,
+        type: 'text' as const,
+        resources: [
+          {
+            title: "VA Education and Training Benefits",
+            description: "Official information on the GI Bill and other programs.",
+            link: "#"
+          },
+          {
+            title: "VET TEC Program",
+            description: "Get training for a high-tech career.",
+            link: "#"
+          }
+        ]
+      };
+    }
+
+    if (lowerMessage.includes('career') || lowerMessage.includes('job')) {
+      return {
+        text: "Translating your military skills to the civilian workforce is a key step. I can connect you with career counseling, resume building workshops, and job placement services specifically for veterans. What kind of career field are you interested in?",
+        sender: 'ranger' as const,
+        type: 'text' as const,
+        resources: [
+          {
+            title: "VA Veteran Readiness and Employment (VR&E)",
+            description: "Services to help with job training and employment.",
+            link: "#"
+          },
+          {
+            title: "Hiring Our Heroes",
+            description: "A nationwide initiative to help veterans and military spouses find jobs.",
+            link: "#"
+          }
+        ]
+      };
+    }
+
+    if (lowerMessage.includes('family') || lowerMessage.includes('caregiver')) {
+      return {
+        text: "Family and caregivers are an essential part of a veteran's support system. There are many resources available, from caregiver support programs to benefits for dependents. What kind of support are you looking for?",
+        sender: 'ranger' as const,
+        type: 'text' as const,
+        resources: [
+          {
+            title: "VA Caregiver Support Program",
+            description: "Assistance and support for caregivers of veterans.",
+            link: "#"
+          },
+          {
+            title: "CHAMPVA Benefits",
+            description: "Healthcare for spouses and children of eligible veterans.",
+            link: "#"
+          }
+        ]
+      };
+    }
     
     return {
       text: "I understand. That's a great question, and I'm here to help you find the right resources and support. Can you tell me a bit more about what specific area you'd like assistance with? I can help with VA benefits, mental health resources, housing assistance, education benefits, or connecting you with local veteran services.",
