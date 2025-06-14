@@ -1,19 +1,22 @@
-
 // src/components/ConversationInterface.tsx
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, Volume2 } from 'lucide-react';
+import { Send, Mic, MicOff, Volume2, Phone, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useConversationContext } from '@/contexts/ConversationContext'; // Import useConversationContext
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useToast } from '@/components/ui/use-toast';
+import { useConversation } from '@11labs/react';
+import { useConversationContext } from '@/contexts/ConversationContext';
 
 const ConversationInterface = () => {
-  // Get messages and isVoiceSessionActive from the shared context
-  const { messages, addMessage, isVoiceSessionActive } = useConversationContext();
+  const { messages, addMessage, isVoiceSessionActive, setVoiceSessionActive } = useConversationContext();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -23,10 +26,82 @@ const ConversationInterface = () => {
     scrollToBottom();
   }, [messages]);
 
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log('Connected to ElevenLabs');
+      setIsConnected(true);
+      setVoiceSessionActive(true);
+      toast({
+        title: "Voice Chat Connected",
+        description: "You can now speak with Ranger AI",
+      });
+    },
+    onDisconnect: () => {
+      console.log('Disconnected from ElevenLabs');
+      setIsConnected(false);
+      setVoiceSessionActive(false);
+      toast({
+        title: "Voice Chat Ended",
+        description: "Voice conversation has been disconnected",
+      });
+    },
+    onMessage: (message) => {
+      console.log('Received message:', message);
+      if (message.message) {
+        addMessage({
+          text: message.message,
+          sender: 'ranger',
+          type: 'voice',
+        });
+      }
+    },
+    onUserSpeech: (text) => {
+      console.log('User spoke:', text);
+      if (text) {
+        addMessage({
+          text: text,
+          sender: 'user',
+          type: 'voice',
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('Voice chat error:', error);
+      setIsConnected(false);
+      setVoiceSessionActive(false);
+      toast({
+        title: "Voice Chat Error",
+        description: "There was an issue with the voice connection",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const startVoiceChat = async () => {
+    try {
+      const agentId = "agent_01jxbejesxfz081hs8wrx21ky7";
+      await conversation.startSession({ agentId });
+    } catch (error) {
+      console.error('Failed to start voice chat:', error);
+      toast({
+        title: "Connection Failed",
+        description: "Could not start voice chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const endVoiceChat = async () => {
+    try {
+      await conversation.endSession();
+    } catch (error) {
+      console.error('Failed to end voice chat:', error);
+    }
+  };
+
   const getRangerResponse = (userMessage: string) => {
     const lowerMessage = userMessage.toLowerCase();
     
-    // Original AI response logic based on text input
     if (lowerMessage.includes('disability') || lowerMessage.includes('claim')) {
       return {
         text: "I can definitely help you with disability claims. The process can seem overwhelming, but I'll guide you through it step by step. To get started, I'll need to know: Are you filing a new claim, or do you need help with an existing one? Also, do you have your DD-214 and medical records ready?",
@@ -97,7 +172,6 @@ const ConversationInterface = () => {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // Add user's text message to shared state
     addMessage({
       text: inputText,
       sender: 'user',
@@ -107,10 +181,9 @@ const ConversationInterface = () => {
     setInputText('');
     setIsLoading(true);
 
-    // Simulate AI processing delay for text responses
     setTimeout(() => {
       const rangerResponse = getRangerResponse(inputText);
-      addMessage(rangerResponse); // Add AI response to shared state
+      addMessage(rangerResponse);
       setIsLoading(false);
     }, 1500);
   };
@@ -122,28 +195,72 @@ const ConversationInterface = () => {
     }
   };
 
-  // This button is now a visual indicator of the global voice session status.
-  // To make it functional (i.e., click to start/stop voice),
-  // you would need to expose startVoiceChat/endVoiceChat functions from VoiceInterface via the context.
-  const handleMicButtonClick = () => {
-    // For now, it just provides visual feedback.
-    // The main voice control is the floating mic button from VoiceInterface.
-  };
-
   return (
     <Card className="h-[600px] flex flex-col border-[#bcc9d0]">
       <div className="p-4 border-b bg-[#bcc9d0] bg-opacity-20">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-[#363643]">Conversation with Ranger</h3>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleMicButtonClick} // This button in ConversationInterface doesn't control actual voice chat directly now
-              className={`border-[#bcc9d0] ${isVoiceSessionActive ? 'bg-red-100 border-[#FF0000]' : ''}`}
-            >
-              {isVoiceSessionActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            </Button>
+            {!isConnected ? (
+              <Button
+                onClick={startVoiceChat}
+                variant="outline"
+                size="sm"
+                className="border-[#bcc9d0]"
+              >
+                <Mic className="h-4 w-4" />
+              </Button>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 px-2 py-1 bg-[#2596be] bg-opacity-20 rounded">
+                  <div className="w-2 h-2 bg-[#2B8EB8] rounded-full animate-pulse"></div>
+                  <span className="text-xs text-[#3f586b] font-medium">
+                    {conversation.isSpeaking ? 'Speaking...' : 'Listening...'}
+                  </span>
+                </div>
+                <Button
+                  onClick={endVoiceChat}
+                  variant="outline"
+                  size="sm"
+                  className="text-[#FF0000] hover:bg-red-50 border-[#bcc9d0]"
+                >
+                  <Phone className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="border-[#bcc9d0]">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-[#363643]">How to use Voice Chat</h4>
+                  <div className="space-y-2 text-sm text-[#3f586b]">
+                    <div className="flex items-start space-x-2">
+                      <Mic className="h-4 w-4 mt-0.5 text-[#2B8EB8]" />
+                      <span>Click the microphone button to start voice conversation</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <Volume2 className="h-4 w-4 mt-0.5 text-[#2B8EB8]" />
+                      <span>Speak naturally - Ranger will respond with voice and text</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <Phone className="h-4 w-4 mt-0.5 text-[#FF0000]" />
+                      <span>Click the phone button to end the voice session</span>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-[#3f586b]">
+                      You can switch between typing and voice at any time. All messages appear in the conversation history.
+                    </p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            
             <Button variant="outline" size="sm" className="border-[#bcc9d0]">
               <Volume2 className="h-4 w-4" />
             </Button>
@@ -177,7 +294,7 @@ const ConversationInterface = () => {
                   </div>
                 )}
                 <p className="text-xs opacity-70 mt-1 flex items-center gap-1">
-                  {message.type === 'voice' && <Mic className="h-3 w-3" />} {/* Voice indicator */}
+                  {message.type === 'voice' && <Mic className="h-3 w-3" />}
                   {message.timestamp.toLocaleTimeString()}
                 </p>
               </div>
