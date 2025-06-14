@@ -35,9 +35,9 @@ const VoiceInterface = () => {
     onMessage: (message) => {
       // This callback receives AI responses (transcript and audio)
       console.log('Received message:', message);
-      if (message.text) {
+      if (message.message) {
         addMessage({
-          text: message.text,
+          text: message.message,
           sender: 'ranger', // Assuming messages from onMessage are AI responses
           type: 'voice',
         });
